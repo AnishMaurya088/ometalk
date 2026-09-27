@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<meta
+    name="description"
+    content="Ometalk - Talk to random strangers anonymously."
+>
+
+<title>Ometalk - Talk to Strangers</title>
+
+<link
+    rel="stylesheet"
+    href="style.css"
+>
+
+</head>
+
+<body>
+
+<!-- =========================================
+     HEADER
+========================================== -->
+
+<header class="header">
+
+    <div class="logo">
+        Ometalk
+    </div>
+
+    <div class="online-status">
+
+        <span class="status-dot"></span>
+
+        <span id="onlineText">
+            Connecting...
+        </span>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================
+     MAIN APPLICATION
+========================================= -->
+
+<main class="app-container">
+
+
+    <!-- =====================================
+         WELCOME SCREEN
+    ====================================== -->
+
+    <section
+        id="welcomeScreen"
+        class="screen"
+    >
+
+        <div class="welcome-card">
+
+            <div class="logo-large">
+                Ometalk
+            </div>
+
+            <h1>
+                Talk to Strangers
+            </h1>
+
+            <p class="subtitle">
+                Meet someone new. Talk anonymously.
+            </p>
+
+
+            <div class="rules">
+
+                <div class="rule">
+                    <span>🔒</span>
+                    <span>No registration required</span>
+                </div>
+
+                <div class="rule">
+                    <span>⚡</span>
+                    <span>Instant random matching</span>
+                </div>
+
+                <div class="rule">
+                    <span>🛡️</span>
+                    <span>Respect other users</span>
+                </div>
+
+            </div>
+
+            <div class="match-options">
+                <span class="options-label">Choose your chat</span>
+                <div class="mode-options" role="group" aria-label="Chat mode">
+                    <label class="mode-option">
+                        <input type="radio" name="chatMode" value="video" checked>
+                        <span>Video chat</span>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="chatMode" value="text">
+                        <span>Text chat</span>
+                    </label>
+                </div>
+                <p id="modeHint" class="mode-hint">Camera and microphone are used for video chat.</p>
+
+                <label class="options-label" for="interestsInput">
+                    Add interests <span>to find someone similar</span>
+                </label>
+                <input
+                    id="interestsInput"
+                    class="interests-input"
+                    type="text"
+                    maxlength="240"
+                    placeholder="Type interests, separated by commas"
+                    autocomplete="off"
+                >
+                <div class="interest-chips" aria-label="Popular interests">
+                    <button type="button" class="interest-chip" data-interest="music">Music</button>
+                    <button type="button" class="interest-chip" data-interest="gaming">Gaming</button>
+                    <button type="button" class="interest-chip" data-interest="movies">Movies</button>
+                    <button type="button" class="interest-chip" data-interest="travel">Travel</button>
+                    <button type="button" class="interest-chip" data-interest="technology">Technology</button>
+                    <button type="button" class="interest-chip" data-interest="sports">Sports</button>
+                </div>
+
+                <label class="age-consent">
+                    <input id="ageConsent" type="checkbox">
+                    <span>I confirm that I am 18 or older and will use the service responsibly.</span>
+                </label>
+            </div>
+
+
+            <button
+                id="startBtn"
+                class="primary-btn"
+                disabled
+            >
+                Start Chat
+            </button>
+
+
+            <p class="age-warning">
+                By using Ometalk, you agree to use the
+                service responsibly.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================
+         CHAT SCREEN
+    ====================================== -->
+
+    <section
+        id="chatScreen"
+        class="chat-screen hidden"
+    >
+
+
+        <!-- =================================
+             VIDEO AREA
+        ================================== -->
+
+        <div class="video-area">
+
+            <!-- Stranger Video -->
+
+            <div
+                class="stranger-video-container"
+                role="button"
+                tabindex="0"
+                aria-label="Stranger video is the main view"
+                aria-pressed="true"
+            >
+
+                <video
+                    id="remoteVideo"
+                    autoplay
+                    playsinline
+                ></video>
+
+
+                <div
+                    id="remotePlaceholder"
+                    class="video-placeholder"
+                >
+
+                    <div class="video-loader" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <p>
+                        Waiting for stranger...
+                    </p>
+
+                    <small>
+                        Your stranger's video will appear here
+                    </small>
+
+                </div>
+
+                <div class="stranger-video-label">Stranger</div>
+
+            </div>
+
+
+            <!-- My Video -->
+
+            <div
+                class="my-video-container"
+                role="button"
+                tabindex="0"
+                aria-label="Make your video the main view"
+                aria-pressed="false"
+            >
+
+                <video
+                    id="localVideo"
+                    autoplay
+                    muted
+                    playsinline
+                ></video>
+
+                <div class="my-video-label">
+                    You
+                </div>
+
+            </div>
+
+            <div class="video-controls">
+                <button
+                    id="cameraBtn"
+                    class="control-btn"
+                    type="button"
+                    aria-pressed="true"
+                >
+                    📹 Camera ON
+                </button>
+
+                <button
+                    id="micBtn"
+                    class="control-btn"
+                    type="button"
+                    aria-pressed="true"
+                >
+                    🎤 Mic ON
+                </button>
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================
+             CHAT AREA
+        ================================== -->
+
+        <div class="chat-area">
+
+
+            <!-- Chat Header -->
+
+            <div class="chat-header">
+
+                <div>
+
+                    <strong>
+                        Stranger
+                    </strong>
+
+                    <div
+                        id="chatStatus"
+                        class="chat-status"
+                    >
+                        Connecting...
+                    </div>
+
+                </div>
+
+                <div class="chat-actions">
+                    <button
+                        id="leaveBtn"
+                        class="ghost-btn"
+                    >
+                        Leave
+                    </button>
+
+                    <button
+                        id="reportBtn"
+                        class="ghost-btn danger"
+                    >
+                        Report
+                    </button>
+
+                    <button
+                        id="nextBtn"
+                        class="next-btn"
+                    >
+                        Next →
+                    </button>
+                </div>
+
+            </div>
+
+
+
+            <!-- Messages -->
+
+            <div
+                id="messages"
+                class="messages"
+            >
+
+                <div class="system-message">
+                    Looking for a stranger...
+                </div>
+
+            </div>
+
+            <div id="typingIndicator" class="typing-indicator" aria-live="polite"></div>
+
+
+
+            <!-- Message Input -->
+
+            <form
+                id="messageForm"
+                class="message-form"
+            >
+
+                <input
+                    id="messageInput"
+                    type="text"
+                    placeholder="Type a message..."
+                    maxlength="1000"
+                    autocomplete="off"
+                >
+
+                <button
+                    type="submit"
+                    class="send-btn"
+                >
+                    Send
+                </button>
+
+            </form>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =========================================
+     FOOTER
+========================================== -->
+
+<footer class="footer">
+
+    <span>
+        © 2026 Ometalk
+    </span>
+
+    <span>•</span>
+
+    <span>
+        Anonymous Chat
+    </span>
+
+</footer>
+
+
+
+<!-- Socket.io -->
+
+<script src="/socket.io/socket.io.js"></script>
+
+
+<!-- Our JavaScript -->
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
