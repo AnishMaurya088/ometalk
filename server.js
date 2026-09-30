@@ -267,6 +267,7 @@ function matchUsers(socketA, socketB, matchOptions) {
 
     socketA.emit("matched", {
         partnerId: socketB.id,
+        partnerName: socketB.data.matchOptions.name,
         roomId: roomId,
         mode: matchOptions.mode,
         sharedInterests
@@ -274,6 +275,7 @@ function matchUsers(socketA, socketB, matchOptions) {
 
     socketB.emit("matched", {
         partnerId: socketA.id,
+        partnerName: socketA.data.matchOptions.name,
         roomId: roomId,
         mode: matchOptions.mode,
         sharedInterests
@@ -351,8 +353,9 @@ function normalizeMatchOptions(data) {
             .map((interest) => String(interest).trim().toLowerCase().slice(0, 30))
             .filter(Boolean))]
         : [];
+    const name = String(data && data.name || "").trim().replace(/[<>]/g, "").slice(0, 24);
 
-    return { mode, interests };
+    return { mode, interests, name };
 }
 
 // ================================================
