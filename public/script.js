@@ -7,15 +7,33 @@ const nextBtn = document.getElementById("nextBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const reportBtn = document.getElementById("reportBtn");
 const interestsInput = document.getElementById("interestsInput");
+const profileNameInput = document.getElementById("profileName");
+const partnerName = document.getElementById("partnerName");
 const ageConsent = document.getElementById("ageConsent");
 const interestChips = [...document.querySelectorAll(".interest-chip")];
 const chatModeInputs = [...document.querySelectorAll('input[name="chatMode"]')];
 const modeHint = document.getElementById("modeHint");
+const modeStory = document.getElementById("modeStory");
+const modeStoryKicker = document.getElementById("modeStoryKicker");
+const modeStoryAccent = document.getElementById("modeStoryAccent");
+const modeStoryRest = document.getElementById("modeStoryRest");
+const modeStoryDescription = document.getElementById("modeStoryDescription");
+const modeStoryPoints = [
+    document.getElementById("modePointOne"),
+    document.getElementById("modePointTwo"),
+    document.getElementById("modePointThree")
+];
 const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 const messages = document.getElementById("messages");
 const chatStatus = document.getElementById("chatStatus");
 const onlineText = document.getElementById("onlineText");
+const homePage = document.querySelector(".home-page");
+const appContainer = document.querySelector(".app-container");
+const startChatLinks = [...document.querySelectorAll(".start-chat-link")];
+const backHomeBtn = document.getElementById("backHomeBtn");
+const faqDialog = document.getElementById("faqDialog");
+const premiumDialog = document.getElementById("premiumDialog");
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 const remotePlaceholder = document.getElementById("remotePlaceholder");
@@ -49,6 +67,7 @@ function resetToWelcomeState() {
     startBtn.disabled = !ageConsent.checked;
     nextBtn.disabled = true;
     messageInput.disabled = true;
+    partnerName.textContent = "Stranger";
     chatStatus.textContent = "Ready";
     remotePlaceholder.classList.remove("hidden");
     remoteVideo.srcObject = null;
@@ -98,9 +117,11 @@ interestChips.forEach((chip) => {
 
 chatModeInputs.forEach((input) => {
     input.addEventListener("change", () => {
+        const mode = input.value;
         modeHint.textContent = input.value === "video"
-            ? "Camera and microphone are used for video chat."
-            : "Text chat does not need camera or microphone access.";
+            ? "Video chat selected. Camera and microphone are needed to connect."
+            : "Text chat selected. No camera or microphone needed to connect.";
+        updateModeStory(mode);
     });
 });
 
@@ -110,6 +131,64 @@ strangerVideoContainer.addEventListener("keydown", (event) => handleVideoViewKey
 myVideoContainer.addEventListener("keydown", (event) => handleVideoViewKeydown(event, "self"));
 messageInput.addEventListener("input", updateTypingState);
 setVideoFocus("stranger");
+
+function updateModeStory(mode) {
+    const isVideo = mode === "video";
+    const story = isVideo
+        ? {
+            kicker: "VIDEO CHAT",
+            accent: "Meet",
+            rest: "face to face, anywhere.",
+            description: "Live video turns a quick hello into a real conversation.",
+            points: ["Live face-to-face", "Camera and mic controls", "Leave whenever you like"]
+        }
+        : {
+            kicker: "TEXT CHAT",
+            accent: "Say hello",
+            rest: "then see where it goes.",
+            description: "Start with a message and let a good conversation find its rhythm.",
+            points: ["No camera needed", "Find shared interests", "Chat at your own pace"]
+        };
+
+    modeStory.dataset.mode = mode;
+    modeStoryKicker.textContent = story.kicker;
+    modeStoryAccent.textContent = story.accent;
+    modeStoryAccent.classList.toggle("blue-word", !isVideo);
+    modeStoryAccent.classList.toggle("pink-word", isVideo);
+    modeStoryRest.textContent = story.rest;
+    modeStoryDescription.textContent = story.description;
+    modeStoryPoints.forEach((point, index) => {
+        point.textContent = story.points[index];
+    });
+}
+
+startChatLinks.forEach((button) => {
+    button.addEventListener("click", () => {
+        const modeInput = chatModeInputs.find((input) => input.value === button.dataset.mode);
+        if (modeInput) {
+            modeInput.checked = true;
+            modeInput.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        homePage.classList.add("hidden");
+        appContainer.classList.remove("hidden");
+        welcomeScreen.classList.remove("hidden");
+        chatScreen.classList.add("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+});
+
+backHomeBtn.addEventListener("click", () => {
+    appContainer.classList.add("hidden");
+    homePage.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+document.getElementById("faqOpenBtn").addEventListener("click", () => faqDialog.showModal());
+document.getElementById("footerFaqBtn").addEventListener("click", () => faqDialog.showModal());
+document.getElementById("faqCloseBtn").addEventListener("click", () => faqDialog.close());
+document.getElementById("premiumOpenBtn").addEventListener("click", () => premiumDialog.showModal());
+document.getElementById("premiumCloseBtn").addEventListener("click", () => premiumDialog.close());
 
 startBtn.addEventListener("click", async () => {
     await startSearching();
@@ -224,8 +303,9 @@ async function startSearching() {
     chatStatus.textContent = "Searching...";
 
     const interests = getSelectedInterests();
+    const name = profileNameInput.value.trim();
 
-    socket.emit("find-stranger", { mode: currentMode, interests });
+    socket.emit("find-stranger", { mode: currentMode, interests, name });
 }
 
 async function startCamera() {
@@ -265,6 +345,7 @@ socket.on("matched", async (data) => {
 
     currentPartnerId = data.partnerId;
     currentRoomId = data.roomId;
+    partnerName.textContent = data.partnerName || "Stranger";
     currentMode = data.mode || currentMode;
     isSearching = false;
 
@@ -275,7 +356,9 @@ socket.on("matched", async (data) => {
     nextBtn.disabled = false;
     reportBtn.disabled = false;
     messageInput.disabled = false;
-    messageInput.focus();
+    if (window.matchMedia("(min-width: 801px)").matches) {
+        messageInput.focus();
+    }
 
     clearMessages();
     addSystemMessage("You are now connected to a stranger.");
